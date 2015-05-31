@@ -1,17 +1,22 @@
 class UsersController < ApplicationController
 
+  skip_before_action :authenticate_user!, only: [:create]
+
   def index
-    render json: User.all, each_serializer: UserSerializer
+    if @current_user && @current_user.admin == true
+      render json: User.all, each_serializer: UserSerializer
+    else
+      render json: ["Page is unauthorized or does not exist."]
+    end
   end
 
   def create
-    if params["admin"] == true
+    if params["admin"] == "true"
       render json: ["You may not create an admin user. This event has been recorded."], status: :unauthorized
       return
     end
 
     user = User.new(user_params)
-
     if user.save
       render json: user
     else
@@ -22,7 +27,7 @@ class UsersController < ApplicationController
   private
 
   def user_params
-    params.require(:user).permit(:first_name, :last_name, :email)
+    params.permit(:first_name, :last_name, :email, :password)
   end
 
 end
