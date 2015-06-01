@@ -6,7 +6,7 @@ class UsersController < ApplicationController
     if @current_user && @current_user.admin == true
       render json: User.all, each_serializer: UserSerializer
     else
-      render json: ["Page is unauthorized or does not exist."]
+      render json: access_denied_message, status: :unauthorized
     end
   end
 

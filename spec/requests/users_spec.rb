@@ -45,7 +45,7 @@ describe "Users API" do
                         headers = {},
                         options = {current_user_email: non_admin.email}
 
-      expect(response.status).to eq 200
+      expect(response.status).to eq 401
 
       results = JSON.parse(response.body, symbolize_names: true)[:users]
 

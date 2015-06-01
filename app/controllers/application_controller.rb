@@ -5,6 +5,10 @@ class ApplicationController < ActionController::Base
 
   before_filter :authenticate_user!
 
+  def access_denied_message
+    ["Page is unauthorized or does not exist."]
+  end
+
   private
 
   class MissingAuthHeaderException < StandardError
