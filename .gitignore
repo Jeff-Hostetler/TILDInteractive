@@ -10,7 +10,10 @@
 # Ignore all logfiles and tempfiles.
 /log/*
 !/log/.keep
+*.log
+.DS_STORE
 /tmp
 .idea*
 .idea
 
+public/system
