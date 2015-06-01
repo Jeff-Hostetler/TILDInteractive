@@ -2,9 +2,8 @@ require "rails_helper"
 
 describe "Sessions API" do
   describe "#create" do
-    user = TestObjectFactory.create_user
+    let(:user)  {TestObjectFactory.create_user}
     it "sets token with valid info" do
-      p user.password
       post "/sessions/",  {email: user.email, password: user.password}
 
 
