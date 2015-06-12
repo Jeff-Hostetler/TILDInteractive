@@ -59,6 +59,7 @@ describe "Loans API" do
   end
 
   describe "#create" do
+    let(:loan_service) = {}
     it "creates a loan for said user" do
       params = {
           borrower_name: "Smith",
