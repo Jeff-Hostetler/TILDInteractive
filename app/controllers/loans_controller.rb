@@ -7,7 +7,9 @@ class LoansController < ApplicationController
   def create
     user = User.find(params[:user_id])
 
-    loan = Loan.new(create_loan_params.merge(user: user))
+    dates = ImportantDateService.new.create(params[:application_date])
+
+    loan = Loan.new(create_loan_params.merge(user: user).merge(dates))
 
     if loan.save
       render json: loan, serializer: LoanSerializer
@@ -24,9 +26,35 @@ class LoansController < ApplicationController
     end
   end
 
+  def update
+    loan = Loan.find(params[:id])
+
+    dates = ImportantDateService.new.update(important_date_service_update_params)
+
+    loan = loan.update(update_loan_params.merge(dates))
+
+    render json: loan, serializer: LoanSerializer
+  end
+
   private
 
   def create_loan_params
-    params.permit(:borrower_name, :description, :application_date)
+    params.permit(:borrower_name, :description)
+  end
+
+  def update_loan_params
+    params.permit(:borrower_name, :description)
+  end
+
+  def important_date_service_update_params
+    params.permit(
+        :disclosures_delivered_date,
+        :disclosures_received_date,
+        :change_of_circumstance_date,
+        :revised_disclosures_delivered_date,
+        :revised_disclosures_received_date,
+        :closing_disclosures_delivered_date,
+        :closing_disclosures_received_date,
+    )
   end
 end

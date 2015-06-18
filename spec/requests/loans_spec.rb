@@ -59,13 +59,11 @@ describe "Loans API" do
   end
 
   describe "#create" do
-    let(:loan_service) = {}
     it "creates a loan for said user" do
       params = {
           borrower_name: "Smith",
           description: "Favorite borrowers",
-          application_date: Time.now + 1.day,
-          disclose_by_date: Time.current + 2.days,
+          application_date: DateTime.new(2015, 6, 11),
       }.to_json
 
       authenticated_post "/users/#{user.id}/loans/",
@@ -81,8 +79,16 @@ describe "Loans API" do
 
       expect(result[:borrower_name]).to eq "Smith"
       expect(result[:description]).to eq "Favorite borrowers"
-      expect(Time.parse(result[:application_date])).to be_within(1.second).of(Time.current + 1.day)
-      expect(result[:disclose_by_date]).to eq nil
+      expect(result[:application_date]).to eq "2015-06-11T00:00:00.000Z"
+      expect(result[:disclose_by_date]).to eq "2015-06-15T00:00:00.000Z"
+      expect(result[:earliest_closing_date]).to eq "2015-06-23T00:00:00.000Z"
+      expect(result[:disclosures_delivered_date]).to eq nil
+      expect(result[:disclosures_received_date]).to eq nil
+      expect(result[:change_of_circumstance_date]).to eq nil
+      expect(result[:revised_disclosures_delivered_date]).to eq nil
+      expect(result[:revised_disclosures_received_date]).to eq nil
+      expect(result[:closing_disclosures_delivered_date]).to eq nil
+      expect(result[:closing_disclosures_received_date]).to eq nil
     end
   end
 
@@ -145,5 +151,51 @@ describe "Loans API" do
 
       expect(result).to match_array("Page is unauthorized or does not exist.")
     end
+  end
+
+  describe"#update" do
+    let(:loan) { Loan.create(user: user,
+                             borrower_name: "Richards",
+                             description: "New loan",
+                             application_date: DateTime.new(2015, 6, 11),
+                             earliest_closing_date: Date.new(2015, 6, 23)
+
+    ) }
+    it "updates a loan" do
+      params = {
+          borrower_name: "Smith",
+          description: "Favorite borrowers",
+          disclosures_delivered_date: DateTime.new(2015, 6, 11),
+          disclosures_received_date: DateTime.new(2015, 6, 12)
+      }.to_json
+
+      authenticated_put "/users/#{user.id}/loans/#{loan.id}",
+                         params = params,
+                         headers = {},
+                         options = {email: user.email, password: user.password}
+
+      expect(response.status).to eq 200
+
+      result = JSON.parse(response.body, symbolize_name: true)[:loan]
+
+      expect(result[:borrower_name]).to eq "Smith"
+      expect(result[:description]).to eq "Favorite borrowers"
+      expect(result[:application_date]).to eq "2015-06-11T00:00:00.000Z"
+      expect(result[:disclose_by_date]).to eq "2015-06-15T00:00:00.000Z"
+      expect(result[:earliest_closing_date]).to eq "2015-06-19T00:00:00.000Z"
+      expect(result[:disclosures_delivered_date]).to eq "2015-06-11T00:00:00.000Z"
+      expect(result[:disclosures_received_date]).to eq "2015-06-12T00:00:00.000Z"
+      expect(result[:change_of_circumstance_date]).to eq nil
+      expect(result[:revised_disclosures_delivered_date]).to eq nil
+      expect(result[:revised_disclosures_received_date]).to eq nil
+      expect(result[:closing_disclosures_delivered_date]).to eq nil
+      expect(result[:closing_disclosures_received_date]).to eq nil
+    end
+
+    it "updates the "
+
+    it "does not allow app, disclose_by, earliest_closing, to be updated"
+
+    it "renders an error if attempting to update another users loan"
   end
 end
